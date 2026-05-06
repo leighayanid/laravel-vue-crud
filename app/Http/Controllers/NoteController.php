@@ -5,20 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Note;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Inertia\Inertia;
 
 class NoteController extends Controller
 {
+    use AuthorizesRequests;
     public function index()
     {
         $notes = auth()->user()->notes()->with('tags')->get();
-        return Inertia::render('Notes/Index', ['notes' => $notes]);
+        return Inertia::render('notes/Index', ['notes' => $notes]);
     }
 
     public function create()
     {
         $tags = Tag::all();
-        return Inertia::render('Notes/Create', ['tags' => $tags]);
+        return Inertia::render('notes/Create', ['tags' => $tags]);
     }
 
     public function store(Request $request)
@@ -41,14 +43,14 @@ class NoteController extends Controller
     public function show(Note $note)
     {
         $this->authorize('view', $note);
-        return Inertia::render('Notes/Show', ['note' => $note->load('tags')]);
+        return Inertia::render('notes/Show', ['note' => $note->load('tags')]);
     }
 
     public function edit(Note $note)
     {
         $this->authorize('update', $note);
         $tags = Tag::all();
-        return Inertia::render('Notes/Edit', [
+        return Inertia::render('notes/Edit', [
             'note' => $note->load('tags'),
             'tags' => $tags,
         ]);
