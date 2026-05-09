@@ -39,7 +39,7 @@
                     <div class="flex flex-col gap-4 border-b p-4 xl:flex-row xl:items-end xl:justify-between">
                         <div class="grid flex-1 gap-2">
                             <Label for="title">Title</Label>
-                            <Input id="title" placeholder="Give this note a title" />
+                            <Input id="title" v-model="form.title" placeholder="Give this note a title" />
                             <InputError />
                         </div>
 
@@ -55,7 +55,7 @@
                                 </button>
                             </div>
 
-                            <Button type="submit">
+                            <Button type="submit" :disabled="form.processing">
                                 <Save class="size-4" />
 
                             </Button>
@@ -99,6 +99,8 @@
 
                     <div class="grid flex-1">
                         <textarea
+                            id="content"
+                            v-model="form.content"
                             class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
                             placeholder="# Start writing in Markdown..."></textarea>
                         <!-- Markdown preview will go here -->
