@@ -40,8 +40,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
+import { Link, useForm, Head } from '@inertiajs/vue3'
 
 defineProps({
   notes: Array,
