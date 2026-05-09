@@ -148,11 +148,11 @@
                     <div
                         class="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-xs text-muted-foreground">
                         <span>{{
-                            1
+                            selectedNoteId
                                 ? 'Editing saved note'
                                 : 'Writing a new note'
                         }}</span>
-                        <span>1000 words</span>
+                        <span>{{ wordCount }} words</span>
                     </div>
                 </form>
             </main>
@@ -339,6 +339,10 @@ const filteredNotes = computed(() => {
     return props.notes.filter(note => {
         return note.title.toLowerCase().includes('') || note.content.toLowerCase().includes('');
     });
+});
+
+const wordCount = computed(() => {
+    return form.content.trim() ? form.content.trim().split(/\s+/).length : 0;
 });
 
 const createNote = () => {

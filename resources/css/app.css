@@ -170,3 +170,50 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer components {
+    .note-markdown {
+        @apply space-y-4 text-sm leading-7;
+    }
+
+    .note-markdown h1 {
+        @apply text-2xl font-semibold;
+    }
+
+    .note-markdown h2 {
+        @apply text-xl font-semibold;
+    }
+
+    .note-markdown h3 {
+        @apply text-lg font-semibold;
+    }
+
+    .note-markdown p {
+        @apply text-foreground;
+    }
+
+    .note-markdown ul {
+        @apply list-disc space-y-1 pl-6;
+    }
+
+    .note-markdown blockquote {
+        @apply border-l-4 border-border pl-4 text-muted-foreground;
+    }
+
+    .note-markdown code {
+        @apply rounded bg-muted px-1.5 py-0.5 font-mono text-xs;
+    }
+
+    .note-markdown pre {
+        @apply overflow-x-auto rounded-md bg-muted p-4;
+    }
+
+    .note-markdown pre code {
+        @apply bg-transparent p-0;
+    }
+
+    .note-markdown a {
+        @apply font-medium text-sky-700 underline underline-offset-4 dark:text-sky-300;
+    }
+}
+
