@@ -14,7 +14,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <Button type="button" @click="createNote">
+                <Button type="button" @click="newNote">
                     <Plus class="size-4" />
                     New note
                 </Button>
@@ -22,98 +22,15 @@
         </header>
         <div class="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
            <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote"/>
-
-            <main class="min-h-[620px] rounded-lg border bg-card">
-                <form class="flex h-full flex-col" @submit.prevent="createNote">
-                    <div class="flex flex-col gap-4 border-b p-4 xl:flex-row xl:items-end xl:justify-between">
-                        <div class="grid flex-1 gap-2">
-                            <Label for="title">Title</Label>
-                            <Input id="title" v-model="form.title" placeholder="Give this note a title" />
-                            <InputError />
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="flex items-center rounded-md border p-1">
-                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm" :class="
-                                        editorMode === 'write'
-                                            ? 'bg-accent text-accent-foreground'
-                                            : 'text-muted-foreground'
-                                    "
-                                    @click="editorMode = 'write'">
-                                    <Edit3 class="size-4" />
-                                    Write
-                                </button>
-                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm" :class="
-                                        editorMode === 'preview'
-                                            ? 'bg-accent text-accent-foreground'
-                                            : 'text-muted-foreground'
-                                    "
-                                    @click="editorMode = 'preview'">
-                                    <PanelRightOpen class="size-4" />
-                                    Preview
-                                </button>
-                            </div>
-
-                            <Button type="submit" :disabled="form.processing">
-                                <Save class="size-4" />
-
-                            </Button>
-                            <Button type="button" variant="destructive" @click="deleteNote">
-                                <Trash2 class="size-4" />
-                            </Button>
-                            <label class="flex items-center gap-2 text-sm">
-                                <input type="checkbox" class="size-4 rounded border-input" />
-                                Pin this note
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-4 border-b p-4 xl:grid-cols-[1fr_auto] xl:items-center">
-                        <div class="flex items-center gap-2">
-                            <Label class="text-sm font-medium">Color</Label>
-                            <Select v-model="form.color">
-                                <SelectTrigger class="w-auto">
-                                    <SelectValue placeholder="Select color" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem v-for="option in colorOptions" :key="option.value"
-                                        :value="option.value">
-                                        {{ option.label }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-
-                    </div>
-
-                    <div class="grid flex-1">
-                        <textarea id="content" v-if="editorMode === 'write'" v-model="form.content"
-                            class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
-                            placeholder="# Start writing in Markdown..."></textarea>
-                        <div v-else
-                            class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground">
-                            <div v-if="form.content.trim()" class="note-markdown" v-html="previewHtml">
-
-                            </div>
-                            <div v-else class="text-center text-sm text-muted-foreground">
-                                Nothing to preview.
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div
-                        class="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-xs text-muted-foreground">
-                        <span>{{
-                            selectedNoteId
-                                ? 'Editing saved note'
-                                : 'Writing a new note'
-                        }}</span>
-                        <span>{{ wordCount }} words</span>
-                    </div>
-                </form>
-            </main>
+            <NotesEditor
+                v-model:editor-mode="editorMode"
+                :form="form"
+                :selected-note-id="selectedNoteId"
+                :preview-html="previewHtml"
+                :word-count="wordCount"
+                @save="createNote"
+                @delete="deleteNote"
+            />
         </div>
     </div>
 
@@ -122,26 +39,17 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import {
-    Edit3,
     FileText,
-    PanelRightOpen,
     Plus,
-    Save,
-    Search,
-    Trash2,
 } from 'lucide-vue-next';
-import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { index } from '@/routes/notes';
-import { Note, NoteColor } from '@/types';
+import type { Note } from '@/types';
 import { computed, ref } from 'vue';
-import { colorOptions, colorStyles } from '@/features/notes/noteColor';
 import { markdownToHtml } from '@/features/notes/markdown';
 import { useNoteForm } from '@/composables/useNoteForm';
 import NotesSidebar from '@/components/notes/NotesSidebar.vue';
+import NotesEditor from '@/components/notes/NotesEditor.vue';
 
 defineOptions({
     layout: {
@@ -158,14 +66,10 @@ const props = defineProps<{
     notes: Note[];
 }>();
 
-const { selectedNoteId, form, createNote, deleteNote, selectNote } = useNoteForm(props.notes);
+const { selectedNoteId, form, createNote, deleteNote, selectNote, newNote } = useNoteForm(props.notes);
 
 // Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
 const editorMode = ref<'write' | 'preview'>('write');
-
-const selectedColor = computed(() => {
-    return form.color as NoteColor;
-});
 
 const filteredNotes = computed(() => {
     return props.notes.filter(note => {
@@ -182,11 +86,4 @@ const previewHtml = computed(() => markdownToHtml(form.content));
 
 
 
-/**
- * Update note functionality is handled in the createNote function, 
- * which checks if a note is selected and either 
- * updates it or creates a new one accordingly. **/
-const updateNote = (id: any) => {
-    alert('Update note functionality coming soon!')
-}
 </script>
