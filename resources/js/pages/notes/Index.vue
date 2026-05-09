@@ -199,7 +199,7 @@ const props = defineProps<{
     notes: Note[];
 }>();
 
-const { selectedNoteId, form, createNote, deleteNote, selectNote } = useNoteForm(props.notes);
+const { selectedNoteId, form, createNote, deleteNote, selectNote, newNote } = useNoteForm(props.notes);
 
 // Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
 const editorMode = ref<'write' | 'preview'>('write');
