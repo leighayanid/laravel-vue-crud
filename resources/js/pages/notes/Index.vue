@@ -137,11 +137,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { destroy, index, store, update } from '@/routes/notes';
-import { Note } from '@/types';
-
-const props = defineProps<{
-    notes: Note[];
-}>();
+import { Note, NoteColor } from '@/types';
+import { computed, ref } from 'vue';
 
 defineOptions({
     layout: {
@@ -154,8 +151,49 @@ defineOptions({
     },
 });
 
+const props = defineProps<{
+    notes: Note[];
+}>();
+
+const selectedNoteId = ref<number | null>(props.notes.length > 0 ? props.notes[0].id : null);
+
+
+const form = useForm({
+    title: props.notes.length > 0 ? props.notes[0].title : '',
+    content: props.notes.length > 0 ? props.notes[0].content : '',
+    color: props.notes.length > 0 ? props.notes[0].color : 'slate' as NoteColor,
+    is_pinned: props.notes.length > 0 ? props.notes[0].is_pinned : false,
+});
+
+const selectedColor = computed(() => {
+    return form.color as NoteColor;
+});
+
+
+
 const createNote = () => {
-    alert('Create note functionality coming soon!')
+    if (selectedNoteId.value) {
+        form.put(update.url(selectedNoteId.value), {
+            preserveScroll: true,
+             onSuccess: () => {
+                alert('Note updated successfully!')
+             },
+             onError: () => {
+                alert('Failed to update note.')
+             }
+        });
+        return;
+    }
+    form.post(store.url(), {
+        preserveScroll: true,
+        onSuccess: () => {
+            alert('Note created successfully!')
+            form.reset()
+        },
+        onError: () => {
+            alert('Failed to create note.')
+        }
+    });
 }
 
 const deleteNote = (id: any) => {

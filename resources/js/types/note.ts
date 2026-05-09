@@ -1,7 +1,7 @@
 export type Note = {
     id: number;
     title: string;
-    body: string;
+    content: string;
     excerpt: string;
     color: NoteColor;
     is_pinned: boolean;
