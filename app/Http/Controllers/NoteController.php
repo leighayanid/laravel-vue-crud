@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Note;
 use Illuminate\Http\RedirectResponse;
-use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Inertia\Inertia;
 
 class NoteController extends Controller
@@ -18,7 +16,8 @@ class NoteController extends Controller
             'id' => $note->id,
             'title' => $note->title,
             'content' => $note->content,
-            'created_at' => $note->created_at->diffForHumans(),
+            'color' => $note->color,
+            'is_pinned' => (bool) $note->is_pinned,
             'updated_at' => $note->updated_at->diffForHumans(),
         ]);
 
@@ -59,25 +58,25 @@ class NoteController extends Controller
         //     'tags' => 'array|exists:tags,id',
         // ]);
 
-        $note->update($this->validateNote($validated));
+        $note->update($this->validateNote($request));
         return to_route('notes.index')->with('success', 'Note updated successfully.');
     }
 
-    public function destroy(Note $note)
+    public function destroy(Request $request, Note $note)
     {
-        $this->authorizeNote('delete', $note);
+        $this->authorizeNote($request, $note);
         $note->delete();
         return to_route('notes.index')->with('success', 'Note deleted successfully.');
     }
 
      /**
-     * @return array{title: string, body?: string|null, color: string, is_pinned: bool}
+     * @return array{title: string, content: string, color: string, is_pinned?: bool}
      */
     private function validateNote(Request $request): array
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:120'],
-            'body' => ['nullable', 'string', 'max:20000'],
+            'content' => ['required', 'string', 'max:20000'],
             'color' => ['required', 'string', 'in:slate,sky,emerald,amber,rose'],
             'is_pinned' => ['boolean'],
         ]);

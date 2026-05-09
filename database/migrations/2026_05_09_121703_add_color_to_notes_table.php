@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('notes', function (Blueprint $table) {
-            $table->string('color')->nullable()->after('content');
-            $table->boolean('is_pinned')->nullable()->after('color');
+            $table->string('color')->nullable()->after('content')->default('#ffffff');
+            $table->boolean('is_pinned')->nullable()->after('color')->default(false);
         });
     }
 
