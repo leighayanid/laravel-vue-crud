@@ -182,6 +182,7 @@ import { Note, NoteColor } from '@/types';
 import { computed, ref } from 'vue';
 import { colorOptions, colorStyles } from '@/features/notes/noteColor';
 import { markdownToHtml } from '@/features/notes/markdown';
+import { useNoteForm } from '@/composables/useNoteForm';
 
 defineOptions({
     layout: {
@@ -198,14 +199,7 @@ const props = defineProps<{
     notes: Note[];
 }>();
 
-const selectedNoteId = ref<number | null>(props.notes.length > 0 ? props.notes[0].id : null);
-
-const form = useForm({
-    title: props.notes.length > 0 ? props.notes[0].title : '',
-    content: props.notes.length > 0 ? props.notes[0].content : '',
-    color: props.notes.length > 0 ? props.notes[0].color : 'slate' as NoteColor,
-    is_pinned: props.notes.length > 0 ? props.notes[0].is_pinned : false,
-});
+const { selectedNoteId, form, createNote, deleteNote, selectNote } = useNoteForm(props.notes);
 
 // Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
 const editorMode = ref<'write' | 'preview'>('write');
@@ -224,66 +218,6 @@ const wordCount = computed(() => {
     return form.content.trim() ? form.content.trim().split(/\s+/).length : 0;
 });
 
-const createNote = () => {
-    if (selectedNoteId.value) {
-        form.put(update.url(selectedNoteId.value), {
-            preserveScroll: true,
-            onSuccess: () => {
-                newNote();
-            },
-            onError: () => {
-                alert('Failed to update note.')
-            }
-        });
-        return;
-    }
-    form.post(store.url(), {
-        preserveScroll: true,
-        onSuccess: () => {
-            newNote();
-        },
-        onError: (e) => {
-            console.error(e);
-            alert('Failed to create note.');
-        }
-    });
-}
-
-const newNote = () => {
-    selectedNoteId.value = null;
-    form.clearErrors();
-    form.reset();
-    form.title = '';
-    form.content = '';
-    form.color = 'slate' as NoteColor;
-    form.is_pinned = false;
-}
-
-const selectNote = (note: Note) => {
-    selectedNoteId.value = note.id;
-    form.title = note.title;
-    form.content = note.content;
-    form.color = note.color as NoteColor;
-    form.is_pinned = note.is_pinned;
-}
-
-const deleteNote = (id: any) => {
-    if (!selectedNoteId.value) {
-        alert('No note selected to delete.');
-        return;
-    }
-    if (confirm('Are you sure you want to delete this note? This action cannot be undone.')) {
-        form.delete(destroy.url(selectedNoteId.value), {
-            preserveScroll: true,
-            onSuccess: () => {
-                newNote();
-            },
-            onError: () => {
-                alert('Failed to delete note.')
-            }
-        });
-    }
-}
 
 const previewHtml = computed(() => markdownToHtml(form.content));
 
