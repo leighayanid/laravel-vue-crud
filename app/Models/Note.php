@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use Database\Factories\NoteFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable(['user_id', 'title', 'content', 'color', 'is_pinned'])]
 class Note extends Model
 {
-
     /** @use HasFactory<NoteFactory> */
     use HasFactory;
 
@@ -26,7 +26,7 @@ class Note extends Model
     //     return $this->belongsToMany(Tag::class);
     // }
 
-     protected function casts(): array
+    protected function casts(): array
     {
         return [
             'is_pinned' => 'boolean',
