@@ -8,8 +8,8 @@
 
         <div class="flex-1 space-y-2 overflow-y-auto pr-1">
             <!-- Note list items will go here -->
-           <NotesListItem v-for="note in props.notes" :key="note.id" :note="note" :selected-note-id="props.selectedNoteId"
-                @select="select" />
+            <NotesListItem v-for="note in props.notes" :key="note.id" :note="note"
+                :selected-note-id="props.selectedNoteId" @select="select" />
 
             <div v-if="props.notes.length === 0"
                 class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">

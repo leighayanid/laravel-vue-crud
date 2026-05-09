@@ -21,16 +21,9 @@
             </div>
         </header>
         <div class="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-           <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote"/>
-            <NotesEditor
-                v-model:editor-mode="editorMode"
-                :form="form"
-                :selected-note-id="selectedNoteId"
-                :preview-html="previewHtml"
-                :word-count="wordCount"
-                @save="createNote"
-                @delete="deleteNote"
-            />
+            <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote" />
+            <NotesEditor v-model:editor-mode="editorMode" :form="form" :selected-note-id="selectedNoteId"
+                :preview-html="previewHtml" :word-count="wordCount" @save="createNote" @delete="deleteNote" />
         </div>
     </div>
 

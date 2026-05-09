@@ -10,29 +10,17 @@
 
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center rounded-md border p-1">
-                        <button
-                            type="button"
-                            class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm"
-                            :class="
-                                editorMode === 'write'
-                                    ? 'bg-accent text-accent-foreground'
-                                    : 'text-muted-foreground'
-                            "
-                            @click="emit('update:editorMode', 'write')"
-                        >
+                        <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm" :class="editorMode === 'write'
+                            ? 'bg-accent text-accent-foreground'
+                            : 'text-muted-foreground'
+                            " @click="emit('update:editorMode', 'write')">
                             <Edit3 class="size-4" />
                             Write
                         </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm"
-                            :class="
-                                editorMode === 'preview'
-                                    ? 'bg-accent text-accent-foreground'
-                                    : 'text-muted-foreground'
-                            "
-                            @click="emit('update:editorMode', 'preview')"
-                        >
+                        <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm" :class="editorMode === 'preview'
+                            ? 'bg-accent text-accent-foreground'
+                            : 'text-muted-foreground'
+                            " @click="emit('update:editorMode', 'preview')">
                             <PanelRightOpen class="size-4" />
                             Preview
                         </button>
@@ -69,17 +57,11 @@
             </div>
 
             <div class="grid flex-1">
-                <textarea
-                    v-if="editorMode === 'write'"
-                    id="content"
-                    v-model="form.content"
+                <textarea v-if="editorMode === 'write'" id="content" v-model="form.content"
                     class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
-                    placeholder="# Start writing in Markdown..."
-                ></textarea>
-                <div
-                    v-else
-                    class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
-                >
+                    placeholder="# Start writing in Markdown..."></textarea>
+                <div v-else
+                    class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground">
                     <div v-if="form.content.trim()" class="note-markdown" v-html="previewHtml"></div>
                     <div v-else class="text-center text-sm text-muted-foreground">
                         Nothing to preview.
@@ -89,8 +71,7 @@
             </div>
 
             <div
-                class="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-xs text-muted-foreground"
-            >
+                class="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-xs text-muted-foreground">
                 <span>{{ selectedNoteId ? 'Editing saved note' : 'Writing a new note' }}</span>
                 <span>{{ wordCount }} words</span>
             </div>
