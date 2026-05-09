@@ -1,55 +1,170 @@
 <template>
-  <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 bg-white border-b border-gray-200">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">My Notes</h1>
-            <Link href="/notes/create" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">
-              Create Note
-            </Link>
-          </div>
 
-          <div v-if="notes.length === 0" class="text-center py-12">
-            <p class="text-gray-500 text-lg">No notes yet. Create your first note!</p>
-          </div>
-
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div v-for="note in notes" :key="note.id" class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
-              <Link :href="`/notes/${note.id}`" class="block">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">{{ note.title }}</h3>
-                <p class="text-gray-600 text-sm line-clamp-2">{{ note.content }}</p>
-              </Link>
-              
-              <div v-if="note.tags && note.tags.length" class="mt-3 flex flex-wrap gap-1">
-                <span v-for="tag in note.tags" :key="tag.id" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                  {{ tag.name }}
-                </span>
-              </div>
-
-              <div class="mt-4 flex gap-2 text-sm">
-                <Link :href="`/notes/${note.id}/edit`" class="text-blue-600 hover:text-blue-900">Edit</Link>
-                <button @click="deleteNote(note.id)" class="text-red-600 hover:text-red-900">Delete</button>
-              </div>
+    <Head title="My Notes" />
+    <div class="flex h-full flex-col flex-1 p-5 gap-5 overflow-x-auto rounded-xl">
+        <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-semibold tracking-normal flex gap-2">
+                    <FileText class="size-8" />Notes
+                </h1>
+                <p class="max-w-2xl text-sm text-muted-foreground">
+                    Write, preview, pin, search, and color-code your notes from
+                    one workspace.
+                </p>
             </div>
-          </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <Button type="button" @click="createNote">
+                    <Plus class="size-4" />
+                    New note
+                </Button>
+            </div>
+        </header>
+        <div class="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <aside class="flex min-h-[360px] flex-col gap-3 rounded-lg border bg-card p-3">
+                <div class="relative">
+                    <Search
+                        class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <!-- Search input -->
+                    <Input class="pl-9" placeholder="Search notes" type="search" />
+                </div>
+
+                <div class="flex-1 space-y-2 overflow-y-auto pr-1">
+                    <!-- Note list items will go here -->
+                </div>
+            </aside>
+
+            <main class="min-h-[620px] rounded-lg border bg-card">
+                <form class="flex h-full flex-col" @submit.prevent="createNote">
+                    <div class="flex flex-col gap-4 border-b p-4 xl:flex-row xl:items-end xl:justify-between">
+                        <div class="grid flex-1 gap-2">
+                            <Label for="title">Title</Label>
+                            <Input id="title" placeholder="Give this note a title" />
+                            <InputError />
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex items-center rounded-md border p-1">
+                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm">
+                                    <Edit3 class="size-4" />
+                                    Write
+                                </button>
+                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm">
+                                    <PanelRightOpen class="size-4" />
+                                    Preview
+                                </button>
+                            </div>
+
+                            <Button type="submit">
+                                <Save class="size-4" />
+
+                            </Button>
+                            <Button type="button" variant="destructive" @click="deleteNote">
+                                <Trash2 class="size-4" />
+                            </Button>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" class="size-4 rounded border-input" />
+                                Pin this note
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 border-b p-4 xl:grid-cols-[1fr_auto] xl:items-center">
+                        <div class="flex items-center gap-2">
+                            <Label class="text-sm font-medium">Color</Label>
+                            <Select>
+                                <SelectTrigger class="w-auto">
+                                    <SelectValue placeholder="Select color" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="slate">Slate</SelectItem>
+                                    <SelectItem value="sky">Sky</SelectItem>
+                                    <SelectItem value="emerald">Emerald</SelectItem>
+                                    <SelectItem value="amber">Amber</SelectItem>
+                                    <SelectItem value="rose">Rose</SelectItem>
+                                    <SelectItem value="violet">Violet</SelectItem>
+                                    <SelectItem value="fuchsia">Fuchsia</SelectItem>
+                                    <SelectItem value="pink">Pink</SelectItem>
+                                    <SelectItem value="indigo">Indigo</SelectItem>
+                                    <SelectItem value="lime">Lime</SelectItem>
+                                    <SelectItem value="orange">Orange</SelectItem>
+                                    <SelectItem value="yellow">Yellow</SelectItem>
+                                    <SelectItem value="red">Red</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+
+                    </div>
+
+                    <div class="grid flex-1">
+                        <textarea
+                            class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
+                            placeholder="# Start writing in Markdown..."></textarea>
+                        <!-- Markdown preview will go here -->
+                    </div>
+
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-xs text-muted-foreground">
+                        <span>{{
+                            1
+                                ? 'Editing saved note'
+                                : 'Writing a new note'
+                        }}</span>
+                        <span>1000 words</span>
+                    </div>
+                </form>
+            </main>
         </div>
-      </div>
     </div>
-  </div>
+
 </template>
 
-<script setup>
-import { computed, ref } from 'vue'
+<script setup lang="ts">
 import { Link, useForm, Head } from '@inertiajs/vue3'
+import {
+    Edit3,
+    FileText,
+    PanelRightOpen,
+    Plus,
+    Save,
+    Search,
+    Trash2,
+} from 'lucide-vue-next';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { destroy, index, store, update } from '@/routes/notes';
+import { Note } from '@/types';
 
-defineProps({
-  notes: Array,
-})
+const props = defineProps<{
+    notes: Note[];
+}>();
 
-const deleteNote = (id) => {
-  if (confirm('Are you sure?')) {
-    useForm({}).delete(`/notes/${id}`)
-  }
+defineOptions({
+    layout: {
+        breadcrumbs: [
+            {
+                title: 'My Notes',
+                href: index(),
+            },
+        ],
+    },
+});
+
+const createNote = () => {
+    alert('Create note functionality coming soon!')
+}
+
+const deleteNote = (id: any) => {
+    if (confirm('Are you sure?')) {
+        alert('Delete note functionality coming soon!')
+    }
+}
+
+const updateNote = (id: any) => {
+    alert('Update note functionality coming soon!')
 }
 </script>
