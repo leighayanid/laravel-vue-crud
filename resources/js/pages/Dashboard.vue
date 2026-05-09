@@ -28,21 +28,16 @@ defineOptions({
                     <div class="text-sm font-semibold text-blue-700 dark:text-blue-300 mt-2">My Notes</div>
                 </div>
             </Link>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
+            <div class="w-full h-full">
+                <PlaceholderPattern
+                    title="Create new file"
+                    description="Start a new project or jot down ideas with a fresh file."
+                    icon="📄"
+                />
+                <Button as-child>
+                    <Link href="/notes" class="absolute inset-0" />
+                </Button>
             </div>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
             </div>
-        </div>
-        <div
-            class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
-        >
-            <PlaceholderPattern />
-        </div>
     </div>
 </template>

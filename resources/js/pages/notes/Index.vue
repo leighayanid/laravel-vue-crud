@@ -1,55 +1,82 @@
 <template>
-  <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 bg-white border-b border-gray-200">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">My Notes</h1>
-            <Link href="/notes/create" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">
-              Create Note
-            </Link>
-          </div>
 
-          <div v-if="notes.length === 0" class="text-center py-12">
-            <p class="text-gray-500 text-lg">No notes yet. Create your first note!</p>
-          </div>
-
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div v-for="note in notes" :key="note.id" class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
-              <Link :href="`/notes/${note.id}`" class="block">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">{{ note.title }}</h3>
-                <p class="text-gray-600 text-sm line-clamp-2">{{ note.content }}</p>
-              </Link>
-              
-              <div v-if="note.tags && note.tags.length" class="mt-3 flex flex-wrap gap-1">
-                <span v-for="tag in note.tags" :key="tag.id" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                  {{ tag.name }}
-                </span>
-              </div>
-
-              <div class="mt-4 flex gap-2 text-sm">
-                <Link :href="`/notes/${note.id}/edit`" class="text-blue-600 hover:text-blue-900">Edit</Link>
-                <button @click="deleteNote(note.id)" class="text-red-600 hover:text-red-900">Delete</button>
-              </div>
+    <Head title="My Notes" />
+    <div class="flex h-full flex-col flex-1 p-5 gap-5 overflow-x-auto rounded-xl">
+        <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-semibold tracking-normal flex gap-2">
+                    <FileText class="size-8" />Notes
+                </h1>
+                <p class="max-w-2xl text-sm text-muted-foreground">
+                    Write, preview, pin, search, and color-code your notes from
+                    one workspace.
+                </p>
             </div>
-          </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <Button type="button" @click="newNote">
+                    <Plus class="size-4" />
+                    New note
+                </Button>
+            </div>
+        </header>
+        <div class="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote" />
+            <NotesEditor v-model:editor-mode="editorMode" :form="form" :selected-note-id="selectedNoteId"
+                :preview-html="previewHtml" :word-count="wordCount" @save="createNote" @delete="deleteNote" />
         </div>
-      </div>
     </div>
-  </div>
+
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3'
+import {
+    FileText,
+    Plus,
+} from 'lucide-vue-next';
+import { Button } from '@/components/ui/button';
+import { index } from '@/routes/notes';
+import type { Note } from '@/types';
+import { computed, ref } from 'vue';
+import { markdownToHtml } from '@/features/notes/markdown';
+import { useNoteForm } from '@/composables/useNoteForm';
+import NotesSidebar from '@/components/notes/NotesSidebar.vue';
+import NotesEditor from '@/components/notes/NotesEditor.vue';
 
-defineProps({
-  notes: Array,
-})
+defineOptions({
+    layout: {
+        breadcrumbs: [
+            {
+                title: 'My Notes',
+                href: index(),
+            },
+        ],
+    },
+});
 
-const deleteNote = (id) => {
-  if (confirm('Are you sure?')) {
-    useForm({}).delete(`/notes/${id}`)
-  }
-}
+const props = defineProps<{
+    notes: Note[];
+}>();
+
+const { selectedNoteId, form, createNote, deleteNote, selectNote, newNote } = useNoteForm(props.notes);
+
+// Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
+const editorMode = ref<'write' | 'preview'>('write');
+
+const filteredNotes = computed(() => {
+    return props.notes.filter(note => {
+        return note.title.toLowerCase().includes('') || note.content.toLowerCase().includes('');
+    });
+});
+
+const wordCount = computed(() => {
+    return form.content.trim() ? form.content.trim().split(/\s+/).length : 0;
+});
+
+
+const previewHtml = computed(() => markdownToHtml(form.content));
+
+
+
 </script>
