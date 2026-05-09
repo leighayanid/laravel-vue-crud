@@ -364,8 +364,20 @@ const selectNote = (note: Note) => {
 }
 
 const deleteNote = (id: any) => {
-    if (confirm('Are you sure?')) {
-        alert('Delete note functionality coming soon!')
+    if (!selectedNoteId.value) {
+        alert('No note selected to delete.');
+        return;
+    }
+    if (confirm('Are you sure you want to delete this note? This action cannot be undone.')) {
+        form.delete(destroy.url(selectedNoteId.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                newNote();
+            },
+            onError: () => {
+                alert('Failed to delete note.')
+            }
+        });
     }
 }
 
