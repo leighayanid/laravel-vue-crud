@@ -76,11 +76,21 @@
 
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="flex items-center rounded-md border p-1">
-                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm">
+                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm" :class="
+                                        editorMode === 'write'
+                                            ? 'bg-accent text-accent-foreground'
+                                            : 'text-muted-foreground'
+                                    "
+                                    @click="editorMode = 'write'">
                                     <Edit3 class="size-4" />
                                     Write
                                 </button>
-                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm">
+                                <button type="button" class="inline-flex h-8 items-center gap-2 rounded px-3 text-sm" :class="
+                                        editorMode === 'preview'
+                                            ? 'bg-accent text-accent-foreground'
+                                            : 'text-muted-foreground'
+                                    "
+                                    @click="editorMode = 'preview'">
                                     <PanelRightOpen class="size-4" />
                                     Preview
                                 </button>
@@ -103,7 +113,7 @@
                     <div class="grid gap-4 border-b p-4 xl:grid-cols-[1fr_auto] xl:items-center">
                         <div class="flex items-center gap-2">
                             <Label class="text-sm font-medium">Color</Label>
-                            <Select v-model="form.color" >
+                            <Select v-model="form.color">
                                 <SelectTrigger class="w-auto">
                                     <SelectValue placeholder="Select color" />
                                 </SelectTrigger>
@@ -120,10 +130,19 @@
                     </div>
 
                     <div class="grid flex-1">
-                        <textarea id="content" v-model="form.content"
+                        <textarea id="content" v-if="editorMode === 'write'" v-model="form.content"
                             class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
                             placeholder="# Start writing in Markdown..."></textarea>
-                        <!-- Markdown preview will go here -->
+                        <div v-else
+                            class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground">
+                            <div v-if="form.content.trim()" class="note-markdown" v-html="previewHtml">
+
+                            </div>
+                            <div v-else class="text-center text-sm text-muted-foreground">
+                                Nothing to preview.
+                            </div>
+                        </div>
+
                     </div>
 
                     <div
@@ -302,13 +321,15 @@ const colorStyles: Record<
 
 const selectedNoteId = ref<number | null>(props.notes.length > 0 ? props.notes[0].id : null);
 
-
 const form = useForm({
     title: props.notes.length > 0 ? props.notes[0].title : '',
     content: props.notes.length > 0 ? props.notes[0].content : '',
     color: props.notes.length > 0 ? props.notes[0].color : 'slate' as NoteColor,
     is_pinned: props.notes.length > 0 ? props.notes[0].is_pinned : false,
 });
+
+// Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
+const editorMode = ref<'write' | 'preview'>('write');
 
 const selectedColor = computed(() => {
     return form.color as NoteColor;
@@ -381,6 +402,105 @@ const deleteNote = (id: any) => {
     }
 }
 
+const previewHtml = computed(() => markdownToHtml(form.content));
+
+function escapeHtml(value: string) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function inlineMarkdown(value: string) {
+    return value
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(
+            /\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g,
+            '<a href="$2" target="_blank" rel="noreferrer">$1</a>',
+        );
+}
+
+function markdownToHtml(markdown: string) {
+    const lines = escapeHtml(markdown).split('\n');
+    const html: string[] = [];
+    let inList = false;
+    let inCode = false;
+
+    for (const rawLine of lines) {
+        const line = rawLine.trimEnd();
+        const trimmed = line.trim();
+
+        if (trimmed.startsWith('```')) {
+            html.push(inCode ? '</code></pre>' : '<pre><code>');
+            inCode = !inCode;
+            continue;
+        }
+
+        if (inCode) {
+            html.push(`${line}\n`);
+            continue;
+        }
+
+        if (!trimmed) {
+            if (inList) {
+                html.push('</ul>');
+                inList = false;
+            }
+
+            continue;
+        }
+
+        const listMatch = trimmed.match(/^[-*]\s+(.+)/);
+
+        if (listMatch) {
+            if (!inList) {
+                html.push('<ul>');
+                inList = true;
+            }
+
+            html.push(`<li>${inlineMarkdown(listMatch[1])}</li>`);
+            continue;
+        }
+
+        if (inList) {
+            html.push('</ul>');
+            inList = false;
+        }
+
+        if (trimmed.startsWith('### ')) {
+            html.push(`<h3>${inlineMarkdown(trimmed.slice(4))}</h3>`);
+        } else if (trimmed.startsWith('## ')) {
+            html.push(`<h2>${inlineMarkdown(trimmed.slice(3))}</h2>`);
+        } else if (trimmed.startsWith('# ')) {
+            html.push(`<h1>${inlineMarkdown(trimmed.slice(2))}</h1>`);
+        } else if (trimmed.startsWith('> ')) {
+            html.push(
+                `<blockquote>${inlineMarkdown(trimmed.slice(2))}</blockquote>`,
+            );
+        } else {
+            html.push(`<p>${inlineMarkdown(trimmed)}</p>`);
+        }
+    }
+
+    if (inList) {
+        html.push('</ul>');
+    }
+
+    if (inCode) {
+        html.push('</code></pre>');
+    }
+
+    return html.join('');
+}
+
+/**
+ * Update note functionality is handled in the createNote function, 
+ * which checks if a note is selected and either 
+ * updates it or creates a new one accordingly. **/
 const updateNote = (id: any) => {
     alert('Update note functionality coming soon!')
 }
