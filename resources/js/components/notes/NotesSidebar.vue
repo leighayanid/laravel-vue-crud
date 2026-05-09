@@ -61,7 +61,6 @@ const select = (note: Note) => {
     emit('select', note);
 };
 
-
 const { selectNote, selectedNoteId } = useNoteForm(props.notes);
 
 
