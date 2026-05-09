@@ -21,49 +21,7 @@
             </div>
         </header>
         <div class="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <aside class="flex min-h-[360px] flex-col gap-3 rounded-lg border bg-card p-3">
-                <div class="relative">
-                    <Search
-                        class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <!-- Search input -->
-                    <Input class="pl-9" placeholder="Search notes" type="search" />
-                </div>
-
-                <div class="flex-1 space-y-2 overflow-y-auto pr-1">
-                    <!-- Note list items will go here -->
-                    <button v-for="note in filteredNotes" :key="note.id" type="button"
-                        class="w-full rounded-md border border-l-4 bg-background p-3 text-left transition hover:bg-accent"
-                        :class="[
-                            colorStyles[note.color].note,
-                            selectedNoteId === note.id
-                                ? 'ring-2 ring-ring/30'
-                                : '',
-                        ]" @click="selectNote(note)">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="size-2 rounded-full" :class="colorStyles[note.color].dot"></span>
-                                    <h2 class="truncate text-sm font-medium">
-                                        {{ note.title }}
-                                    </h2>
-                                </div>
-                                <p class="line-clamp-2 text-xs text-muted-foreground">
-                                    {{ note.excerpt || 'No note body yet.' }}
-                                </p>
-                            </div>
-                            <Pin v-if="note.is_pinned" class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                        </div>
-                        <p class="mt-2 text-xs text-muted-foreground">
-                            {{ note.updated_at_human }}
-                        </p>
-                    </button>
-
-                    <div v-if="filteredNotes.length === 0"
-                        class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        No notes match your search.
-                    </div>
-                </div>
-            </aside>
+           <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote"/>
 
             <main class="min-h-[620px] rounded-lg border bg-card">
                 <form class="flex h-full flex-col" @submit.prevent="createNote">
@@ -162,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { Link, useForm, Head } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import {
     Edit3,
     FileText,
@@ -177,12 +135,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { destroy, index, store, update } from '@/routes/notes';
+import { index } from '@/routes/notes';
 import { Note, NoteColor } from '@/types';
 import { computed, ref } from 'vue';
 import { colorOptions, colorStyles } from '@/features/notes/noteColor';
 import { markdownToHtml } from '@/features/notes/markdown';
 import { useNoteForm } from '@/composables/useNoteForm';
+import NotesSidebar from '@/components/notes/NotesSidebar.vue';
 
 defineOptions({
     layout: {
@@ -199,7 +158,7 @@ const props = defineProps<{
     notes: Note[];
 }>();
 
-const { selectedNoteId, form, createNote, deleteNote, selectNote, newNote } = useNoteForm(props.notes);
+const { selectedNoteId, form, createNote, deleteNote, selectNote } = useNoteForm(props.notes);
 
 // Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
 const editorMode = ref<'write' | 'preview'>('write');

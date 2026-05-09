@@ -4,6 +4,7 @@ import { destroy, store, update } from '@/routes/notes';
 import type { Note, NoteColor } from '@/types';
 
 export function useNoteForm(notes: Note[]) {
+    
     const selectedNoteId = ref<number | null>(
         notes.length > 0 ? notes[0].id : null,
     );
