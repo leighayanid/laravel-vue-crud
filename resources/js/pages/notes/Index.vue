@@ -72,24 +72,18 @@
                     <div class="grid gap-4 border-b p-4 xl:grid-cols-[1fr_auto] xl:items-center">
                         <div class="flex items-center gap-2">
                             <Label class="text-sm font-medium">Color</Label>
-                            <Select>
+                            <Select v-model="form.color" >
                                 <SelectTrigger class="w-auto">
                                     <SelectValue placeholder="Select color" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="slate">Slate</SelectItem>
-                                    <SelectItem value="sky">Sky</SelectItem>
-                                    <SelectItem value="emerald">Emerald</SelectItem>
-                                    <SelectItem value="amber">Amber</SelectItem>
-                                    <SelectItem value="rose">Rose</SelectItem>
-                                    <SelectItem value="violet">Violet</SelectItem>
-                                    <SelectItem value="fuchsia">Fuchsia</SelectItem>
-                                    <SelectItem value="pink">Pink</SelectItem>
-                                    <SelectItem value="indigo">Indigo</SelectItem>
-                                    <SelectItem value="lime">Lime</SelectItem>
-                                    <SelectItem value="orange">Orange</SelectItem>
-                                    <SelectItem value="yellow">Yellow</SelectItem>
-                                    <SelectItem value="red">Red</SelectItem>
+                                    <SelectItem
+                                        v-for="option in colorOptions"
+                                        :key="option.value"
+                                        :value="option.value"
+                                    >
+                                        {{ option.label }}
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -157,6 +151,21 @@ const props = defineProps<{
     notes: Note[];
 }>();
 
+const colorOptions: Array<{ label: string; value: NoteColor }> = [
+    { label: 'Slate', value: 'slate' },
+    { label: 'Sky', value: 'sky' },
+    { label: 'Emerald', value: 'emerald' },
+    { label: 'Amber', value: 'amber' },
+    { label: 'Rose', value: 'rose' },
+    { label: 'Violet', value: 'violet' },
+    { label: 'Fuchsia', value: 'fuchsia' },
+    { label: 'Pink', value: 'pink' },
+    { label: 'Indigo', value: 'indigo' },
+    { label: 'Orange', value: 'orange' },
+    { label: 'Yellow', value: 'yellow' },
+    { label: 'Red', value: 'red' },
+];
+
 const selectedNoteId = ref<number | null>(props.notes.length > 0 ? props.notes[0].id : null);
 
 
@@ -171,14 +180,12 @@ const selectedColor = computed(() => {
     return form.color as NoteColor;
 });
 
-
-
 const createNote = () => {
     if (selectedNoteId.value) {
         form.put(update.url(selectedNoteId.value), {
             preserveScroll: true,
              onSuccess: () => {
-                alert('Note updated successfully!')
+               newNote();
              },
              onError: () => {
                 alert('Failed to update note.')
@@ -189,13 +196,22 @@ const createNote = () => {
     form.post(store.url(), {
         preserveScroll: true,
         onSuccess: () => {
-            alert('Note created successfully!')
-            form.reset()
+            newNote();
         },
         onError: () => {
             alert('Failed to create note.')
         }
     });
+}
+
+const newNote = () => {
+    selectedNoteId.value = null;
+    form.clearErrors();
+    form.reset();
+    form.title = '';
+    form.content = '';
+    form.color = 'slate' as NoteColor;
+    form.is_pinned = false;
 }
 
 const deleteNote = (id: any) => {

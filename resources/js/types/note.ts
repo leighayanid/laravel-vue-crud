@@ -9,4 +9,4 @@ export type Note = {
     updated_at_human: string | null;
 };
 
-export type NoteColor = 'slate' | 'sky' | 'emerald' | 'amber' | 'rose';
+export type NoteColor = 'slate' | 'sky' | 'emerald' | 'amber' | 'rose' | 'violet' | 'fuchsia' | 'indigo' | 'gray' | 'zinc' | 'neutral' | 'stone' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink';
