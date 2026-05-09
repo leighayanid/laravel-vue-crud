@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('notes', function (Blueprint $table) {
-            $table->string('color')->nullable()->after('content')->default('#ffffff');
+            $table->string('color')->nullable()->after('content')->default('slate');
             $table->boolean('is_pinned')->nullable()->after('color')->default(false);
         });
     }

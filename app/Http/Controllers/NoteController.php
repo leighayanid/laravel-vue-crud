@@ -5,10 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Note;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class NoteController extends Controller
 {
+    private const NOTE_COLORS = [
+        'slate',
+        'sky',
+        'emerald',
+        'amber',
+        'rose',
+        'violet',
+        'fuchsia',
+        'pink',
+        'indigo',
+        'orange',
+        'yellow',
+        'red',
+        'gray',
+        'zinc',
+        'neutral',
+        'stone',
+        'green',
+        'blue',
+        'purple',
+    ];
+
     public function index(Request $request)
     {
         $notes = Note::query()->ownedBy($request->user())->latest('updated_at')->get()
@@ -16,7 +39,7 @@ class NoteController extends Controller
             'id' => $note->id,
             'title' => $note->title,
             'content' => $note->content,
-            'color' => $note->color,
+            'color' => in_array($note->color, self::NOTE_COLORS, true) ? $note->color : 'slate',
             'is_pinned' => (bool) $note->is_pinned,
             'updated_at' => $note->updated_at->diffForHumans(),
         ]);
@@ -77,7 +100,7 @@ class NoteController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:120'],
             'content' => ['required', 'string', 'max:20000'],
-            'color' => ['required', 'string', 'in:slate,sky,emerald,amber,rose'],
+            'color' => ['required', 'string', Rule::in(self::NOTE_COLORS)],
             'is_pinned' => ['boolean'],
         ]);
     }

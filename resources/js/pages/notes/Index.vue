@@ -31,6 +31,37 @@
 
                 <div class="flex-1 space-y-2 overflow-y-auto pr-1">
                     <!-- Note list items will go here -->
+                    <button v-for="note in filteredNotes" :key="note.id" type="button"
+                        class="w-full rounded-md border border-l-4 bg-background p-3 text-left transition hover:bg-accent"
+                        :class="[
+                            colorStyles[note.color].note,
+                            selectedNoteId === note.id
+                                ? 'ring-2 ring-ring/30'
+                                : '',
+                        ]" @click="selectNote(note)">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0 space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="size-2 rounded-full" :class="colorStyles[note.color].dot"></span>
+                                    <h2 class="truncate text-sm font-medium">
+                                        {{ note.title }}
+                                    </h2>
+                                </div>
+                                <p class="line-clamp-2 text-xs text-muted-foreground">
+                                    {{ note.excerpt || 'No note body yet.' }}
+                                </p>
+                            </div>
+                            <Pin v-if="note.is_pinned" class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                        </div>
+                        <p class="mt-2 text-xs text-muted-foreground">
+                            {{ note.updated_at_human }}
+                        </p>
+                    </button>
+
+                    <div v-if="filteredNotes.length === 0"
+                        class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                        No notes match your search.
+                    </div>
                 </div>
             </aside>
 
@@ -77,11 +108,8 @@
                                     <SelectValue placeholder="Select color" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem
-                                        v-for="option in colorOptions"
-                                        :key="option.value"
-                                        :value="option.value"
-                                    >
+                                    <SelectItem v-for="option in colorOptions" :key="option.value"
+                                        :value="option.value">
                                         {{ option.label }}
                                     </SelectItem>
                                 </SelectContent>
@@ -92,9 +120,7 @@
                     </div>
 
                     <div class="grid flex-1">
-                        <textarea
-                            id="content"
-                            v-model="form.content"
+                        <textarea id="content" v-model="form.content"
                             class="min-h-[420px] resize-none bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground"
                             placeholder="# Start writing in Markdown..."></textarea>
                         <!-- Markdown preview will go here -->
@@ -164,7 +190,115 @@ const colorOptions: Array<{ label: string; value: NoteColor }> = [
     { label: 'Orange', value: 'orange' },
     { label: 'Yellow', value: 'yellow' },
     { label: 'Red', value: 'red' },
+    { label: 'Gray', value: 'gray' },
+    { label: 'Zinc', value: 'zinc' },
+    { label: 'Neutral', value: 'neutral' },
+    { label: 'Stone', value: 'stone' },
+    { label: 'Green', value: 'green' },
+    { label: 'Blue', value: 'blue' },
+    { label: 'Purple', value: 'purple' }
 ];
+
+const colorStyles: Record<
+    NoteColor,
+    { dot: string; note: string; swatch: string }
+> = {
+    slate: {
+        dot: 'bg-slate-500',
+        note: 'border-l-slate-500',
+        swatch: 'bg-slate-500',
+    },
+    sky: {
+        dot: 'bg-sky-500',
+        note: 'border-l-sky-500',
+        swatch: 'bg-sky-500',
+    },
+    emerald: {
+        dot: 'bg-emerald-500',
+        note: 'border-l-emerald-500',
+        swatch: 'bg-emerald-500',
+    },
+    amber: {
+        dot: 'bg-amber-500',
+        note: 'border-l-amber-500',
+        swatch: 'bg-amber-500',
+    },
+    rose: {
+        dot: 'bg-rose-500',
+        note: 'border-l-rose-500',
+        swatch: 'bg-rose-500',
+    },
+    violet: {
+        dot: 'bg-violet-500',
+        note: 'border-l-violet-500',
+        swatch: 'bg-violet-500',
+    },
+    fuchsia: {
+        dot: 'bg-fuchsia-500',
+        note: 'border-l-fuchsia-500',
+        swatch: 'bg-fuchsia-500',
+    },
+    indigo: {
+        dot: 'bg-indigo-500',
+        note: 'border-l-indigo-500',
+        swatch: 'bg-indigo-500',
+    },
+    orange: {
+        dot: 'bg-orange-500',
+        note: 'border-l-orange-500',
+        swatch: 'bg-orange-500',
+    },
+    yellow: {
+        dot: 'bg-yellow-500',
+        note: 'border-l-yellow-500',
+        swatch: 'bg-yellow-500',
+    },
+    red: {
+        dot: 'bg-red-500',
+        note: 'border-l-red-500',
+        swatch: 'bg-red-500',
+    },
+    pink: {
+        dot: 'bg-pink-500',
+        note: 'border-l-pink-500',
+        swatch: 'bg-pink-500',
+    },
+    gray: {
+        dot: 'bg-gray-500',
+        note: 'border-l-gray-500',
+        swatch: 'bg-gray-500',
+    },
+    zinc: {
+        dot: '  bg-zinc-500',
+        note: 'border-l-zinc-500',
+        swatch: 'bg-zinc-500',
+    },
+    neutral: {
+        dot: 'bg-neutral-500',
+        note: 'border-l-neutral-500',
+        swatch: 'bg-neutral-500',
+    },
+    stone: {
+        dot: 'bg-stone-500',
+        note: 'border-l-stone-500',
+        swatch: 'bg-stone-500'
+    },
+    green: {
+        dot: 'bg-green-500',
+        note: 'border-l-green-500',
+        swatch: 'bg-green-500'
+    },
+    blue: {
+        dot: 'bg-blue-500',
+        note: 'border-l-blue-500',
+        swatch: 'bg-blue-500'
+    },
+    purple: {
+        dot: 'bg-purple-500',
+        note: 'border-l-purple-500',
+        swatch: 'bg-purple-500'
+    }
+};
 
 const selectedNoteId = ref<number | null>(props.notes.length > 0 ? props.notes[0].id : null);
 
@@ -180,16 +314,22 @@ const selectedColor = computed(() => {
     return form.color as NoteColor;
 });
 
+const filteredNotes = computed(() => {
+    return props.notes.filter(note => {
+        return note.title.toLowerCase().includes('') || note.content.toLowerCase().includes('');
+    });
+});
+
 const createNote = () => {
     if (selectedNoteId.value) {
         form.put(update.url(selectedNoteId.value), {
             preserveScroll: true,
-             onSuccess: () => {
-               newNote();
-             },
-             onError: () => {
+            onSuccess: () => {
+                newNote();
+            },
+            onError: () => {
                 alert('Failed to update note.')
-             }
+            }
         });
         return;
     }
@@ -198,8 +338,9 @@ const createNote = () => {
         onSuccess: () => {
             newNote();
         },
-        onError: () => {
-            alert('Failed to create note.')
+        onError: (e) => {
+            console.error(e);
+            alert('Failed to create note.');
         }
     });
 }
@@ -212,6 +353,14 @@ const newNote = () => {
     form.content = '';
     form.color = 'slate' as NoteColor;
     form.is_pinned = false;
+}
+
+const selectNote = (note: Note) => {
+    selectedNoteId.value = note.id;
+    form.title = note.title;
+    form.content = note.content;
+    form.color = note.color as NoteColor;
+    form.is_pinned = note.is_pinned;
 }
 
 const deleteNote = (id: any) => {
