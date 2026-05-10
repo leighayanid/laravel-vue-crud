@@ -2,13 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Models\Note;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
 
     public function test_guests_are_redirected_to_the_login_page()
     {
@@ -23,5 +32,22 @@ class DashboardTest extends TestCase
 
         $response = $this->get(route('dashboard'));
         $response->assertOk();
+    }
+
+    public function test_dashboard_includes_the_authenticated_users_notes_count()
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        Note::factory()->count(3)->for($user)->create();
+        Note::factory()->for($otherUser)->create();
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Dashboard')
+                ->where('notesCount', 3)
+            );
     }
 }
