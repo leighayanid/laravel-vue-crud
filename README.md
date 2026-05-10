@@ -1,37 +1,22 @@
-# Laravel Markdown Editor
+# LaraNote
 
-This project was created as part of a hiring process for a Laravel + Vue.js developer position. It began as a simple note-taking application and is intended to grow into a basic markdown editor while revisiting Laravel, Inertia.js, and Vue fundamentals.
+LaraNote is a simple note-taking app built with Laravel, Inertia.js, Vue, and TypeScript. This project was created as part of a hiring process and started as a CRUD notes app. It now includes authentication, a cleaner landing page, a dashboard summary, markdown preview, and production deployment on Render.
+
+Live site: https://laravel-vue-crud.onrender.com
+
+Note: the app is hosted on Render's free tier, so the first visit may take a little while to load while the service wakes up.
 
 ## Features
 
-- User registration and authentication
+- User registration and login
 - Email verification and two-factor authentication support
-- Create, view, edit, and delete notes
-- Attach tags to notes
+- Create, update, and delete notes
+- Pin and color-code notes
+- Markdown preview for note content
+- Dashboard with total notes count
 - Profile, password, and security settings
-
-## Learning Goals
-
-- Revisit Laravel routing, controllers, models, migrations, policies, and validation.
-- Practice building full-stack pages with Inertia.js.
-- Build Vue components for forms, previews, layout, and editor interactions.
-- Turn the note editor into a markdown writing experience with preview support.
-
-## Assessment Focus
-
-- Demonstrate basic Laravel application structure and conventions.
-- Use Inertia.js to connect Laravel routes and controllers with Vue pages.
-- Build maintainable Vue components with TypeScript.
-- Show familiarity with authentication, authorization, forms, validation, and CRUD flows.
-
-## Markdown Editor Roadmap
-
-- Add markdown input for note content.
-- Render markdown previews when viewing notes.
-- Add a split editor and preview screen.
-- Add autosave or draft handling.
-- Add basic formatting shortcuts for headings, bold, italic, links, and lists.
-- Improve note organization with tags and search.
+- Responsive Vue/Inertia pages
+- Feature tests for dashboard and notes behavior
 
 ## Tech Stack
 
@@ -40,60 +25,61 @@ This project was created as part of a hiring process for a Laravel + Vue.js deve
 - Vue 3
 - TypeScript
 - Tailwind CSS
-- SQLite by default
+- SQLite for local development
+- PostgreSQL on Render
+- Docker for deployment
 
-## Requirements
-
-- PHP 8.3 or newer
-- Composer
-- Node.js and npm
-
-## Setup
-
-Install PHP and JavaScript dependencies:
+## Local Setup
 
 ```bash
 composer install
 npm install
-```
-
-Create the environment file and application key:
-
-```bash
 cp .env.example .env
 php artisan key:generate
-```
-
-Create the SQLite database file and run migrations:
-
-```bash
 touch database/database.sqlite
 php artisan migrate
-```
-
-Start the development server:
-
-```bash
 composer run dev
 ```
 
-The app will be available at `http://127.0.0.1:8000`.
+The local app runs at:
 
-## Common Commands
-
-```bash
-npm run dev          # Start the Vite dev server only
-npm run build        # Build frontend assets
-npm run lint:check   # Check JavaScript and Vue linting
-npm run types:check  # Check TypeScript types
-composer test        # Run formatting checks and PHP tests
+```txt
+http://127.0.0.1:8000
 ```
 
-## Project Structure
+## Tests
 
-- `app/Http/Controllers/NoteController.php` handles note CRUD actions.
-- `app/Models` contains the `Note`, `Tag`, and `User` models.
-- `resources/js/pages` contains Inertia/Vue pages.
-- `resources/js/components` contains shared Vue components.
+```bash
+php artisan test
+npm run types:check
+```
+
+## Deployment
+
+The app is deployed to Render using Docker and Render PostgreSQL.
+
+Important production environment values:
+
+```txt
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://laravel-vue-crud.onrender.com
+ASSET_URL=https://laravel-vue-crud.onrender.com
+DB_CONNECTION=pgsql
+DATABASE_URL=<Render Internal Database URL>
+AUTORUN_ENABLED=true
+```
+
+Render start command:
+
+```bash
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+```
+
+## Project Notes
+
+- `app/Http/Controllers/NoteController.php` handles note CRUD.
+- `resources/js/pages` contains the Inertia/Vue pages.
+- `resources/js/components` contains shared UI components.
 - `routes/web.php` defines the main web routes.
-- `database/migrations` contains database schema changes.
+- `tests/Feature` contains the Laravel feature tests.
