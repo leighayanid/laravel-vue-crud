@@ -53,7 +53,9 @@ class NoteController extends Controller
     {
        $data = $this->validateNote($request);
        $request->user()->notes()->create($data);
-       return redirect()->route('notes.index')->with('success', 'Note created successfully.');
+       Inertia::flash('toast', ['type' => 'success', 'message' => 'Note created successfully.']);
+
+       return redirect()->route('notes.index');
     }
     
 
@@ -84,14 +86,18 @@ class NoteController extends Controller
         // ]);
 
         $note->update($this->validateNote($request));
-        return to_route('notes.index')->with('success', 'Note updated successfully.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Note updated successfully.']);
+
+        return to_route('notes.index');
     }
 
     public function destroy(Request $request, Note $note)
     {
         $this->authorizeNote($request, $note);
         $note->delete();
-        return to_route('notes.index')->with('success', 'Note deleted successfully.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Note deleted successfully.']);
+
+        return to_route('notes.index');
     }
 
      /**

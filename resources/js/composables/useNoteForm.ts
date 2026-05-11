@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 import { destroy, store, update } from '@/routes/notes';
 import type { Note, NoteColor } from '@/types';
 
@@ -43,7 +44,7 @@ export function useNoteForm(notes: Note[]) {
                     newNote();
                 },
                 onError: () => {
-                    alert('Failed to update note.');
+                    toast.error('Failed to update note.');
                 },
             });
 
@@ -56,14 +57,14 @@ export function useNoteForm(notes: Note[]) {
                 newNote();
             },
             onError: () => {
-                alert('Failed to create note.');
+                toast.error('Failed to create note.');
             },
         });
     };
 
     const deleteNote = () => {
         if (!selectedNoteId.value) {
-            alert('No note selected to delete.');
+            toast.info('No note selected to delete.');
             return;
         }
 
@@ -77,7 +78,7 @@ export function useNoteForm(notes: Note[]) {
                 newNote();
             },
             onError: () => {
-                alert('Failed to delete note.');
+                toast.error('Failed to delete note.');
             },
         });
     };
