@@ -40,6 +40,7 @@ class NoteController extends Controller
             'title' => $note->title,
             'content' => $note->content,
             'color' => in_array($note->color, self::NOTE_COLORS, true) ? $note->color : 'slate',
+            'excerpt' => Str::of($note->content ?? '')->squish()->limit(120),
             'is_pinned' => (bool) $note->is_pinned,
             'updated_at' => $note->updated_at->diffForHumans(),
         ]);
