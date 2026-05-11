@@ -1,11 +1,11 @@
 <template>
     <button type="button"
-        class="w-full rounded-md border border-l-4 bg-background p-3 text-left transition hover:bg-accent" :class="[
+        class="w-full rounded-md border border-l-4 p-3 text-left transition" :class="[
             colorStyles[note.color].note,
-            selectedNoteId === note.id
-                ? 'ring-2 ring-ring/30'
-                : '',
-        ]" @click="select(note)">
+            isSelected
+                ? 'bg-accent text-accent-foreground shadow-sm ring-2 ring-ring/30'
+                : 'bg-background hover:bg-accent',
+        ]" :aria-current="isSelected ? 'true' : undefined" @click="select(note)">
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 space-y-1">
                 <div class="flex items-center gap-2">
@@ -27,9 +27,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Note } from '@/types';
-import { colorStyles } from '@/features/notes/noteColor';
 import { Pin } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { colorStyles } from '@/features/notes/noteColor';
+import type { Note } from '@/types';
 
 const props = defineProps<{
     note: Note;
@@ -39,6 +40,8 @@ const props = defineProps<{
 const emit = defineEmits<{
     select: [note: Note];
 }>();
+
+const isSelected = computed(() => props.selectedNoteId === props.note.id);
 
 const select = (note: Note) => {
     emit('select', note);
