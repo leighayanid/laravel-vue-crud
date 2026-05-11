@@ -3,7 +3,7 @@
         <div class="relative">
             <Search class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <!-- Search input -->
-            <Input class="pl-9" placeholder="Search notes" type="search"/>
+            <Input v-model="searchQuery" class="pl-9" placeholder="Search notes" type="search" />
         </div>
 
         <div class="flex-1 space-y-2 overflow-y-auto pr-1">
@@ -19,9 +19,10 @@
     </aside>
 </template>
 <script setup lang="ts">
-import type { Note } from '@/types';
 import { Search } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 import { Input } from '@/components/ui/input';
+import type { Note } from '@/types';
 import NotesListItem from './NotesListItem.vue';
 
 const props = defineProps<{
@@ -31,7 +32,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     select: [note: Note];
+    search: [query: string];
 }>();
+
+const searchQuery = ref('');
+
+watch(searchQuery, value => {
+    emit('search', value.toString());
+});
 
 const select = (note: Note) => {
     emit('select', note);
