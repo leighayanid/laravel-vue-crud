@@ -21,7 +21,8 @@
             </div>
         </header>
         <div class="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote" />
+            <NotesSidebar :notes="filteredNotes" :selected-note-id="selectedNoteId" @select="selectNote"
+                @search="searchQuery = $event" />
             <NotesEditor v-model:editor-mode="editorMode" :form="form" :selected-note-id="selectedNoteId"
                 :preview-html="previewHtml" :word-count="wordCount" @save="createNote" @delete="deleteNote" />
         </div>
@@ -63,10 +64,21 @@ const { selectedNoteId, form, createNote, deleteNote, selectNote, newNote } = us
 
 // Editor mode can be 'write' or 'preview'. For now, we'll just implement 'write' mode and add 'preview' later. **/
 const editorMode = ref<'write' | 'preview'>('write');
+const searchQuery = ref('');
 
 const filteredNotes = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+
+    if (!query) {
+        return props.notes;
+    }
+
     return props.notes.filter(note => {
-        return note.title.toLowerCase().includes('') || note.content.toLowerCase().includes('');
+        return [
+            note.title,
+            note.content,
+            note.excerpt,
+        ].some(value => value?.toLowerCase().includes(query));
     });
 });
 
