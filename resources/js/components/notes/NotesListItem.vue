@@ -21,7 +21,7 @@
             <Pin v-if="note.is_pinned" class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         </div>
         <p class="mt-2 text-xs text-muted-foreground">
-            {{ note.updated_at_human }}
+            {{ note.updated_at }}
         </p>
     </button>
 </template>
